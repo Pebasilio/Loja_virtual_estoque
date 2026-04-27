@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using ApiEstoqueRoupas.Data;
 using ApiEstoqueRoupas.Models;
 
-namespace ApiEstoqueRoupas.Repositories
+namespace ApiEstoqueRoupas.Repositories // Responsável pelo acesso aos dados de produtos no banco SQLite, executa operações SQL diretamente
 {
     public class ProductRepository : IProductRepository
     {
@@ -18,7 +18,7 @@ namespace ApiEstoqueRoupas.Repositories
             _databaseHelper = databaseHelper;
         }
 
-        public async Task<List<Product>> GetAllAsync()
+        public async Task<List<Product>> GetAllAsync() // Busca todos os produtos do banco
         {
             var products = new List<Product>();
             using (var connection = _databaseHelper.GetConnection())
@@ -45,7 +45,7 @@ namespace ApiEstoqueRoupas.Repositories
             return products;
         }
 
-        public async Task<Product?> GetByIdAsync(int id)
+        public async Task<Product?> GetByIdAsync(int id) // Busca um produto específico pelo ID
         {
             using (var connection = _databaseHelper.GetConnection())
             {
@@ -73,7 +73,7 @@ namespace ApiEstoqueRoupas.Repositories
             return null;
         }
 
-        public async Task<List<Product>> GetLowStockAsync()
+        public async Task<List<Product>> GetLowStockAsync() // Retorna produtos com estoque abaixo do limite definido
         {
             var products = new List<Product>();
             using (var connection = _databaseHelper.GetConnection())
@@ -101,7 +101,7 @@ namespace ApiEstoqueRoupas.Repositories
             return products;
         }
 
-        public async Task<Product> AddAsync(Product product)
+        public async Task<Product> AddAsync(Product product) // Insere um novo produto no banco
         {
             using (var connection = _databaseHelper.GetConnection())
             {
@@ -126,7 +126,7 @@ namespace ApiEstoqueRoupas.Repositories
             return product;
         }
 
-        public async Task<bool> UpdateAsync(Product product)
+        public async Task<bool> UpdateAsync(Product product) // Atualiza os dados de um produto existente
         {
             using (var connection = _databaseHelper.GetConnection())
             {
@@ -155,7 +155,7 @@ namespace ApiEstoqueRoupas.Repositories
             }
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id) // Remove um produto do banco
         {
             using (var connection = _databaseHelper.GetConnection())
             {

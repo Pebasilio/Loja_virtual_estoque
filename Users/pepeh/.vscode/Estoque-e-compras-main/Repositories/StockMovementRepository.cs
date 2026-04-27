@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using ApiEstoqueRoupas.Data;
 using ApiEstoqueRoupas.Models;
 
-namespace ApiEstoqueRoupas.Repositories
+namespace ApiEstoqueRoupas.Repositories  // Registra movimentações de estoque (entrada e saída) e mantém histórico de alterações
 {
     public class StockMovementRepository : IStockMovementRepository
     {

@@ -1,6 +1,6 @@
 using System.Data.SQLite;
 
-namespace ApiEstoqueRoupas.Data
+namespace ApiEstoqueRoupas.Data // Responsável por criar e inicializar o banco de dados SQLite
 {
     public class DatabaseHelper
     {
@@ -11,7 +11,7 @@ namespace ApiEstoqueRoupas.Data
             _connectionString = connectionString;
         }
 
-        public void Initialize()
+        public void Initialize() // Executa o script SQL para criação das tabelas
         {
             using (var connection = new SQLiteConnection(_connectionString))
             {
@@ -52,7 +52,7 @@ namespace ApiEstoqueRoupas.Data
             }
         }
 
-        public SQLiteConnection GetConnection()
+        public SQLiteConnection GetConnection() // Garante que o banco exista antes da aplicação rodar
         {
             return new SQLiteConnection(_connectionString);
         }

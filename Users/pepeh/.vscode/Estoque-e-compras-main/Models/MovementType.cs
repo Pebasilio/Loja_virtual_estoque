@@ -1,8 +1,8 @@
 namespace ApiEstoqueRoupas.Models
 {
-    public enum MovementType
+    public enum MovementType // Define o tipo de movimentação de estoque
     {
-        ENTRADA = 1,
-        SAIDA = 2
+        ENTRADA = 1, // adiciona ao estoque
+        SAIDA = 2 // remove do estoque
     }
 }

@@ -2,12 +2,12 @@ using System;
 
 namespace ApiEstoqueRoupas.Models
 {
-    public class Product
+    public class Product // Representa um produto no sistema de estoque
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public int Quantity { get; set; }
-        public int ReorderThreshold { get; set; }
+        public int Quantity { get; set; } // Quantidade atual em estoque
+        public int ReorderThreshold { get; set; } // Quantidade mínima antes de precisar reposição
         public decimal Price { get; set; }
 
         public int CategoryId { get; set; }

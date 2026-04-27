@@ -3,7 +3,7 @@ using ApiEstoqueRoupas.Models;
 using ApiEstoqueRoupas.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ApiEstoqueRoupas.Controllers
+namespace ApiEstoqueRoupas.Controllers // Controller responsável pelo gerenciamento de produtos (Endpoints e o CRUD)
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -19,29 +19,29 @@ namespace ApiEstoqueRoupas.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll() // Retorna todos os produtos cadastrados
         {
             var products = await _repository.GetAllAsync();
             return Ok(products);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id) // Retorna um produto específico com base no ID
         {
             var product = await _repository.GetByIdAsync(id);
-            if (product is null) return NotFound(new { message = $"Produto {id} não encontrado." });
+            if (product is null) return NotFound(new { message = $"Produto {id} não encontrado." }); // Retorna 404 caso não exista
             return Ok(product);
         }
 
         [HttpGet("low-stock")]
-        public async Task<IActionResult> GetLowStock()
+        public async Task<IActionResult> GetLowStock() // Retorna produtos com quantidade menor ou igual ao limite mínimo definido
         {
             var products = await _repository.GetLowStockAsync();
             return Ok(products);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Product product)
+        public async Task<IActionResult> Create([FromBody] Product product) // Cria um novo produto no sistema e valida os dados antes de inserir no banco
         {
             if (string.IsNullOrWhiteSpace(product.Name))
                 return BadRequest(new { message = "Nome é obrigatório." });
@@ -61,11 +61,11 @@ namespace ApiEstoqueRoupas.Controllers
 
             product.Category = null;
             var created = await _repository.AddAsync(product);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created); 
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Product product)
+        public async Task<IActionResult> Update(int id, [FromBody] Product product) // Atualiza um produto existente , o ID da URL deve corresponder ao ID do objeto
         {
             if (id != product.Id)
                 return BadRequest(new { message = "ID da rota não corresponde ao ID do corpo." });
@@ -86,7 +86,7 @@ namespace ApiEstoqueRoupas.Controllers
             return Ok(new { message = "Produto atualizado com sucesso.", product });
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:int}")] // Remove um produto do sistema pelo ID
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _repository.DeleteAsync(id);

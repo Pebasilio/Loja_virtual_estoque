@@ -3,7 +3,7 @@ using ApiEstoqueRoupas.Models;
 using ApiEstoqueRoupas.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ApiEstoqueRoupas.Controllers
+namespace ApiEstoqueRoupas.Controllers  // Repositório responsável pelo acesso aos dados de categorias
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -16,17 +16,17 @@ namespace ApiEstoqueRoupas.Controllers
             _repository = repository;
         }
 
-        [HttpGet]
+        [HttpGet]  // Retorna todas as categorias cadastradas no sistema
         public async Task<IActionResult> GetAll() => Ok(await _repository.GetAllAsync());
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}")] // Retorna uma categoria específica com base no ID
         public async Task<IActionResult> GetById(int id)
         {
             var category = await _repository.GetByIdAsync(id);
             return category is null ? NotFound(new { message = $"Categoria {id} não encontrada." }) : Ok(category);
         }
 
-        [HttpPost]
+        [HttpPost] // Cria uma nova categoria no sistema
         public async Task<IActionResult> Create([FromBody] Category category)
         {
             if (string.IsNullOrWhiteSpace(category.Name))
@@ -36,7 +36,7 @@ namespace ApiEstoqueRoupas.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:int}")] // Atualiza uma categoria existente
         public async Task<IActionResult> Update(int id, [FromBody] Category category)
         {
             if (id != category.Id)
@@ -49,7 +49,7 @@ namespace ApiEstoqueRoupas.Controllers
             return Ok(new { message = "Categoria atualizada.", category });
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:int}")] // Remove uma categoria do sistema
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _repository.DeleteAsync(id);

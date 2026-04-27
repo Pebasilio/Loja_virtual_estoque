@@ -5,7 +5,7 @@ using ApiEstoqueRoupas.Models;
 using ApiEstoqueRoupas.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ApiEstoqueRoupas.Controllers
+namespace ApiEstoqueRoupas.Controllers // Registra movimentações de estoque (entrada/saída), e atualiza a quantidade do produto automaticamente
 {
     [ApiController]
     [Route("api/[controller]")]

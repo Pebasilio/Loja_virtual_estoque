@@ -5,10 +5,10 @@ using System.Data.SQLite;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = "Data Source=estoque.db";
+var connectionString = "Data Source=estoque.db"; // Define o banco SQLite local que será utilizado
 
 builder.Services.AddSingleton(new DatabaseHelper(connectionString));
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();// Registra o repositório de produtos para injeção de dependência / Sempre que IProductRepository for solicitado, ProductRepository será utilizado
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IStockMovementRepository, StockMovementRepository>();
 
@@ -33,11 +33,10 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Initialize database
 var databaseHelper = app.Services.GetRequiredService<DatabaseHelper>();
-databaseHelper.Initialize();
+databaseHelper.Initialize(); // Garante que o banco e as tabelas sejam criados ao iniciar o programa
 
-// Seed initial data if empty
+// insere dados iniciais se estiver vazio
 using (var connection = new SQLiteConnection(connectionString))
 {
     connection.Open();
@@ -48,7 +47,7 @@ using (var connection = new SQLiteConnection(connectionString))
 
         if (count == 0)
         {
-            // Add categories
+            // Insere categorias padrão apenas se o banco estiver vazio
             var categories = new[] { "Camisas", "Jaquetas", "Calças", "Meias" };
             var categoryIds = new Dictionary<string, int>();
 
@@ -63,7 +62,7 @@ using (var connection = new SQLiteConnection(connectionString))
                 }
             }
 
-            // Add products
+            // Add produtos
             var produtosIniciais = new List<(string name, string category, int quantity, int reorderThreshold, decimal price)>
             {
                 ("Camisa Polo Azul", "Camisas", 30, 5, 89.90m),

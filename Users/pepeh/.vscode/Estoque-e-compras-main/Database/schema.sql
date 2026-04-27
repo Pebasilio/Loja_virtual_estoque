@@ -1,10 +1,4 @@
--- ============================================================
--- Script do banco de dados - Sistema de Controle de Estoque
--- SGBD: SQLite
--- Gerado a partir do modelo do Entity Framework Core
--- ============================================================
-
--- Tabela: Categories
+-- Tabela de categorias de produtos 
 CREATE TABLE IF NOT EXISTS "Categories" (
     "Id"   INTEGER NOT NULL CONSTRAINT "PK_Categories" PRIMARY KEY AUTOINCREMENT,
     "Name" TEXT    NOT NULL
@@ -25,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "Products" (
 CREATE INDEX IF NOT EXISTS "IX_Products_CategoryId" ON "Products" ("CategoryId");
 
 -- Tabela: StockMovements (FK -> Products)
--- Type é persistido como string ("ENTRADA" | "SAIDA") via conversor do EF
+-- Histórico de movimentações de estoque 
 CREATE TABLE IF NOT EXISTS "StockMovements" (
     "Id"           INTEGER  NOT NULL CONSTRAINT "PK_StockMovements" PRIMARY KEY AUTOINCREMENT,
     "ProductId"    INTEGER  NOT NULL,
