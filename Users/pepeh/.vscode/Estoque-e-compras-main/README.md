@@ -16,20 +16,20 @@ Projeto organizado em camadas:
 ├── Controllers/   # Endpoints da API (ProductsController, CategoriesController, StockController)
 ├── Models/        # Entidades (Product, Category, StockMovement) + enum MovementType + DTOs
 ├── Repositories/  # Repository Pattern (interfaces + implementações)
-├── Data/          # AppDbContext (Entity Framework Core)
+├── Data/          # DatabaseHelper (System.Data.SQLite)
 ├── Database/      # Script SQL (schema.sql) para criação manual do banco
 ├── Postman/       # Coleção Postman para teste dos endpoints
 ├── Program.cs     # Configuração, DI, seed do banco
 └── estoque.db     # Banco SQLite (gerado automaticamente no 1º run)
 ```
 
-Fluxo: **Controller → Repository → DbContext → SQLite**
+Fluxo: **Controller → Repository → DatabaseHelper → SQLite**
 
 ## Tecnologias
 
 - .NET 7 / C#
 - ASP.NET Core Web API (Controllers)
-- Entity Framework Core (Sqlite)
+- System.Data.SQLite (raw SQL)
 - Repository Pattern
 - Swagger (Swashbuckle)
 - SQLite
@@ -139,7 +139,7 @@ A coleção está em `Postman/EstoqueAPI.postman_collection.json`. Importe no Po
 
 ## Script do banco
 
-Um script SQL equivalente ao schema gerado pelo EF está em `Database/schema.sql`, incluindo `CREATE TABLE`, chaves estrangeiras, índices e `INSERT`s de seed.
+O schema do banco é criado automaticamente pelo DatabaseHelper em `Data/DatabaseHelper.cs`, usando raw SQL. Um script equivalente está em `Database/schema.sql` para referência.
 
 ## Conceitos de C# aplicados
 
@@ -148,6 +148,6 @@ Um script SQL equivalente ao schema gerado pelo EF está em `Database/schema.sql
 - **Construtores** — `Category(string)`, `Product(string, int, int, int, decimal)`.
 - **Collections** — `List<Product>`, `List<Category>`, `List<StockMovement>`.
 - **Enum** — `MovementType { ENTRADA, SAIDA }`.
-- **Entity Framework Core** — DbContext, relacionamentos, `Include`, `AsNoTracking`.
+- **System.Data.SQLite** — Conexões diretas, comandos SQL, DataReader.
 - **Repository Pattern** — `IProductRepository`, `ICategoryRepository`, `IStockMovementRepository`.
 - **Injeção de dependência** — repositórios injetados nos controllers.

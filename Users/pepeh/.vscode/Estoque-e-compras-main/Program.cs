@@ -1,15 +1,13 @@
 using ApiEstoqueRoupas.Data;
 using ApiEstoqueRoupas.Models;
 using ApiEstoqueRoupas.Repositories;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Builder;
+using System.Data.SQLite;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=estoque.db"));
+var connectionString = "Data Source=estoque.db";
 
+builder.Services.AddSingleton(new DatabaseHelper(connectionString));
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IStockMovementRepository, StockMovementRepository>();
@@ -35,60 +33,97 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Initialize database
+var databaseHelper = app.Services.GetRequiredService<DatabaseHelper>();
+databaseHelper.Initialize();
+
+// Seed initial data if empty
+using (var connection = new SQLiteConnection(connectionString))
+{
+    connection.Open();
+    using (var command = connection.CreateCommand())
+    {
+        command.CommandText = "SELECT COUNT(*) FROM Categories";
+        var count = (long)command.ExecuteScalar();
+
+        if (count == 0)
+        {
+            // Add categories
+            var categories = new[] { "Camisas", "Jaquetas", "Calças", "Meias" };
+            var categoryIds = new Dictionary<string, int>();
+
+            foreach (var categoryName in categories)
+            {
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = "INSERT INTO Categories (Name) VALUES (@Name); SELECT last_insert_rowid();";
+                    cmd.Parameters.AddWithValue("@Name", categoryName);
+                    var id = (long)cmd.ExecuteScalar();
+                    categoryIds[categoryName] = (int)id;
+                }
+            }
+
+            // Add products
+            var produtosIniciais = new List<(string name, string category, int quantity, int reorderThreshold, decimal price)>
+            {
+                ("Camisa Polo Azul", "Camisas", 30, 5, 89.90m),
+                ("Camisa Branca", "Camisas", 25, 5, 59.90m),
+                ("Camisa Preta", "Camisas", 40, 8, 59.90m),
+                ("Jaqueta Jeans", "Jaquetas", 20, 3, 199.90m),
+                ("Jaqueta de Couro", "Jaquetas", 10, 2, 499.90m),
+                ("Calça Jeans Azul", "Calças", 35, 6, 149.90m),
+                ("Calça Moletom Cinza", "Calças", 28, 4, 119.90m),
+                ("Calça Preta", "Calças", 18, 3, 129.90m),
+                ("Meias Brancas (par)", "Meias", 100, 20, 14.90m),
+                ("Meias Pretas (par)", "Meias", 80, 15, 14.90m),
+                ("Camisa Social Azul", "Camisas", 25, 5, 129.90m),
+                ("Camisa Social Branca", "Camisas", 30, 6, 129.90m),
+                ("Camisa Estampada", "Camisas", 22, 4, 79.90m),
+                ("Jaqueta de Moletom", "Jaquetas", 15, 3, 169.90m),
+                ("Jaqueta Puffer", "Jaquetas", 12, 2, 289.90m),
+                ("Calça Cargo Verde", "Calças", 20, 5, 139.90m),
+                ("Calça Social Preta", "Calças", 17, 3, 159.90m),
+                ("Calça Jeans Clara", "Calças", 33, 6, 149.90m),
+                ("Meias Coloridas (par)", "Meias", 70, 10, 19.90m),
+                ("Meias Esportivas (par)", "Meias", 90, 15, 24.90m)
+            };
+
+            foreach (var (name, category, quantity, reorderThreshold, price) in produtosIniciais)
+            {
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        INSERT INTO Products (Name, Quantity, ReorderThreshold, Price, CategoryId)
+                        VALUES (@Name, @Quantity, @ReorderThreshold, @Price, @CategoryId)";
+
+                    cmd.Parameters.AddWithValue("@Name", name);
+                    cmd.Parameters.AddWithValue("@Quantity", quantity);
+                    cmd.Parameters.AddWithValue("@ReorderThreshold", reorderThreshold);
+                    cmd.Parameters.AddWithValue("@Price", price);
+                    cmd.Parameters.AddWithValue("@CategoryId", categoryIds[category]);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            Console.WriteLine($"Banco criado com {produtosIniciais.Count} produtos e 4 categorias.");
+        }
+        else
+        {
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT COUNT(*) FROM Products";
+                var productCount = (long)cmd.ExecuteScalar();
+                Console.WriteLine($"Banco existente com {productCount} produtos.");
+            }
+        }
+    }
+}
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
-
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated();
-
-    if (!context.Categories.Any())
-    {
-        var camisas = new Category("Camisas");
-        var jaquetas = new Category("Jaquetas");
-        var calcas = new Category("Calças");
-        var meias = new Category("Meias");
-
-        context.Categories.AddRange(camisas, jaquetas, calcas, meias);
-        context.SaveChanges();
-
-        var produtosIniciais = new List<Product>
-        {
-            new Product("Camisa Polo Azul", camisas.Id, 30, 5, 89.90m),
-            new Product("Camisa Branca", camisas.Id, 25, 5, 59.90m),
-            new Product("Camisa Preta", camisas.Id, 40, 8, 59.90m),
-            new Product("Jaqueta Jeans", jaquetas.Id, 20, 3, 199.90m),
-            new Product("Jaqueta de Couro", jaquetas.Id, 10, 2, 499.90m),
-            new Product("Calça Jeans Azul", calcas.Id, 35, 6, 149.90m),
-            new Product("Calça Moletom Cinza", calcas.Id, 28, 4, 119.90m),
-            new Product("Calça Preta", calcas.Id, 18, 3, 129.90m),
-            new Product("Meias Brancas (par)", meias.Id, 100, 20, 14.90m),
-            new Product("Meias Pretas (par)", meias.Id, 80, 15, 14.90m),
-            new Product("Camisa Social Azul", camisas.Id, 25, 5, 129.90m),
-            new Product("Camisa Social Branca", camisas.Id, 30, 6, 129.90m),
-            new Product("Camisa Estampada", camisas.Id, 22, 4, 79.90m),
-            new Product("Jaqueta de Moletom", jaquetas.Id, 15, 3, 169.90m),
-            new Product("Jaqueta Puffer", jaquetas.Id, 12, 2, 289.90m),
-            new Product("Calça Cargo Verde", calcas.Id, 20, 5, 139.90m),
-            new Product("Calça Social Preta", calcas.Id, 17, 3, 159.90m),
-            new Product("Calça Jeans Clara", calcas.Id, 33, 6, 149.90m),
-            new Product("Meias Coloridas (par)", meias.Id, 70, 10, 19.90m),
-            new Product("Meias Esportivas (par)", meias.Id, 90, 15, 24.90m)
-        };
-
-        context.Products.AddRange(produtosIniciais);
-        context.SaveChanges();
-
-        Console.WriteLine($"Banco criado com {produtosIniciais.Count} produtos e 4 categorias.");
-    }
-    else
-    {
-        Console.WriteLine($"Banco existente com {context.Products.Count()} produtos.");
-    }
-}
 
 app.MapControllers();
 
@@ -97,5 +132,7 @@ Console.WriteLine("  Swagger:    http://localhost:5123/swagger");
 Console.WriteLine("  Produtos:   http://localhost:5123/api/products");
 Console.WriteLine("  Categorias: http://localhost:5123/api/categories");
 Console.WriteLine("  Estoque:    http://localhost:5123/api/stock/...\n");
+
+app.Run();
 
 app.Run();
