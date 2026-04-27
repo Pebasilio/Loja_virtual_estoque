@@ -81,8 +81,7 @@ Fluxo: **Controller → Repository → DatabaseHelper → SQLite**
 | POST   | `/api/stock/exit`                    | Registra saída de estoque (valida disponibilidade)        |
 | GET    | `/api/stock/history/{productId}`     | Histórico de movimentações do produto                     |
 | GET    | `/api/stock/movements?type=ENTRADA`  | Movimentações (filtrável por `ENTRADA` ou `SAIDA`)        |
-| GET    | `/api/stock/restock-alerts`          | Produtos que precisam de reposição (com sugestão)         |
-| GET    | `/api/stock/report`                  | Relatório consolidado do estoque                          |
+
 
 ## Exemplos de Payload
 
