@@ -62,7 +62,7 @@ using (var connection = new SQLiteConnection(connectionString))
                 }
             }
 
-            // Add produtos
+            // Adiciona produtos
             var produtosIniciais = new List<(string name, string category, int quantity, int reorderThreshold, decimal price)>
             {
                 ("Camisa Polo Azul", "Camisas", 30, 5, 89.90m),
